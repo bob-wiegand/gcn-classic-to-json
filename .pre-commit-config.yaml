@@ -6,6 +6,7 @@ repos:
     hooks:
       - id: check-added-large-files
         # Prevent giant files from being committed.
+        args: ['--maxkb=600']
       - id: check-case-conflict
         # Check for files with names that would conflict on a case-insensitive
         # filesystem like MacOS HFS+ or Windows FAT.

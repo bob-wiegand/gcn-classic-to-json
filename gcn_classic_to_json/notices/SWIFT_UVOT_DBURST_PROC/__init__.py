@@ -2,6 +2,11 @@ import numpy as np
 
 from ... import utils
 
+# from ...utils import load_attachments
+
+
+# REW IMO parse_uvot_image would be better placed in SWIFT_UVOT_DBURST
+
 filters = [
     "Blocked",
     "UV_Grism",
@@ -54,4 +59,14 @@ def parse(bin):
     ]  # Unused. According to Docs: 'useless by the time it reaches GCN distribution'
     bin[20:22]  # Spare. According to Docs: '8 bytes for the future'
 
-    return {**parse_uvot_image(bin)}
+    return {
+        **parse_uvot_image(bin),
+        **utils.load_attachments(
+            [
+                ("uvot_catalog_image.fits.gz", "uvot_catalog_image_ftz"),
+                ("uvot_field_image.ps.gz", "uvot_field_image_psz"),
+                ("uvot_sky_image.fits.gz", "uvot_sky_image_ftz"),
+                ("uvot_sources_image.fits.gz", "uvot_sources_image_ftz"),
+            ]
+        ),
+    }

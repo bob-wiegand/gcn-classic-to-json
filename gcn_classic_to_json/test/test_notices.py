@@ -7,6 +7,7 @@ import pytest
 from .. import notices
 from ..json import dumps
 from ..notices import _frombuffer as _orig_frombuffer
+from ..utils import attachments
 
 files = importlib.resources.files(notices)
 
@@ -38,6 +39,16 @@ class NDArrayNanny(np.ndarray):
         return super().__getitem__(i)
 
 
+@pytest.fixture
+def generate():
+    return True
+
+
+@pytest.fixture
+def attach():
+    return True
+
+
 @pytest.mark.parametrize("key", notices.keys)
 def test_all_fields_used(key, monkeypatch):
     """Check that every field in the binary packet is used in the conversion."""
@@ -62,6 +73,7 @@ def test_all_fields_used(key, monkeypatch):
         )
 
 
+# @pytest.mark.parametrize("generate", generate)
 @pytest.mark.parametrize("key", notices.keys)
 def test_notices(key, generate):
     """Check the output of the parser against known JSON output."""
@@ -80,3 +92,35 @@ def test_notices(key, generate):
     with json_path.open("r") as f:
         expected = load(f)
     assert actual == expected
+
+
+@pytest.mark.parametrize("key", notices.keys)
+def test_attachments(key, generate, attach):
+    bin_path = files / key / "example.bin"
+
+    # could parametrize for different sets of attachments...
+    attach_dir = files / key / "attach"
+
+    found = {}
+    if attach_dir.is_dir():
+        for e in attach_dir.iterdir():
+            if e.is_file():
+                found[e.name] = str(e)
+        attachments(set=found)
+
+        json_path = attach_dir / "example.json"
+
+        value = bin_path.read_bytes()
+        actual_str = dumps(notices.parse(key, value), indent=2)
+        actual = loads(actual_str)
+
+        if generate:
+            with json_path.open("w") as f:
+                print(actual_str, file=f)
+
+        with json_path.open("r") as f:
+            expected = load(f)
+        assert actual == expected
+
+    else:
+        pytest.skip(f"{key} does not have attachments")

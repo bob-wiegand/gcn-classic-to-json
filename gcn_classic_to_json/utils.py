@@ -1,3 +1,6 @@
+import base64
+from pathlib import Path
+
 import numpy as np
 from astropy.time import Time
 
@@ -56,3 +59,34 @@ def binary_to_string(binary):
         .strip(b"\0")
         .decode()
     )
+
+
+def attachments(set=None):
+    """Get (set) the global list of attachments"""
+
+    if not hasattr(attachments, "VALUE"):
+        attachments.VALUE = {}
+
+    if set is not None:
+        attachments.VALUE = set
+
+    return attachments.VALUE
+
+
+def load_attachments(fname_jkey_tuples):
+    # 2025-01-15 have[name] = path
+    # If it were a Traversable, could simplify to .read_bytes
+    have = attachments()
+
+    json_attach = {}
+
+    for fname, jkey in fname_jkey_tuples:
+        if fname in have:
+            print(f"\nfound {fname}- attempt load")
+            # this could fail due to races in GCN
+            path_obj = Path(have[fname])
+            json_attach[jkey] = base64.b64encode(path_obj.read_bytes()).decode("ASCII")
+        else:
+            print(f"\nmissing {fname} attachment")
+
+    return json_attach

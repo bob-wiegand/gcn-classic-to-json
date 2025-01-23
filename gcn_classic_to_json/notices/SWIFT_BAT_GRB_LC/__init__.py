@@ -59,4 +59,10 @@ def parse(bin):
         "bright_star_nearby": bool(soln_status_bits[13]),
         "removed_from_catalog": bool(soln_status_bits[15]),
         "galaxy_nearby": bool(soln_status_bits[16]),
+        **utils.load_attachments(
+            [
+                ("bat_raw_lc.fits", "bat_raw_lc_ftz"),
+                ("bat_raw_lcx.fits", "bat_raw_lcx_fits"),
+            ]
+        ),
     }

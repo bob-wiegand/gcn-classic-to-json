@@ -38,4 +38,14 @@ def parse(bin):
     bin[19]  # Intentionally Omitted. Bits seemed to be used for internal messages
     bin[20:22]  # Spare. According to Docs: '8 bytes for future use'
 
-    return {**parse_uvot_srclist(bin)}
+    return {
+        **parse_uvot_srclist(bin),
+        **utils.load_attachments(
+            [
+                ("uvot_catalog_srclist.fits.gz", "uvot_catalog_srclist_ftz"),
+                ("uvot_field_srclist.ps.gz", "uvot_field_srclist_ps_gz"),
+                ("uvot_sky_srclist.fits.gz", "uvot_sky_srclist_ftz"),
+                ("uvot_sources_srclist.fits.gz", "uvot_sources_srclist_ftz"),
+            ]
+        ),
+    }
